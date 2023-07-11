@@ -47,106 +47,114 @@ def activar(item_id):
     return redirect('/activar-desactivar')
 
 
-
-
 @app.route('/insertar', methods=['GET', 'POST'])
 def insertar():
     if request.method == 'POST':
         db = conexion()
-        #cliente#
-        NombreC = request.form['nombre_cliente']
-        RutC = request.form['Rut_cliente']
-        Apellido = request.form['apellido_cliente']
-        Teléfono = request.form['telefono_cliente']
-        Dirección = request.form['direccion_cliente']
-        Email = request.form['email_cliente']
-
-        #menu#
-        NombreM = request.form['nombre_menu']
-        DescripciónM = request.form['descripcion_menu']
-        Platos = []
-        
-        for i in range(3):
+        db.clientes.find()  
+        if request.form.get('insertar_clientes'):
+            # Acciones para actualizar clientes
+            #cliente#
+            NombreC = request.form['nombre_cliente']
+            RutC = request.form['Rut_cliente']
+            Apellido = request.form['apellido_cliente']
+            Teléfono = request.form['telefono_cliente']
+            Dirección = request.form['direccion_cliente']
+            Email = request.form['email_cliente'] 
             
-            NombreP = request.form[f'nombre_plato{i}']
-            DescripciónP = request.form[f'descripcion_plato{i}']
-            Preciop = request.form[f'precio_plato{i}']
-            Plato = {"Nombre": NombreP, "Descripción": DescripciónP , "Precio": Preciop}
-            Platos.append(Plato)
-                        
-        #pedido#
-        RutC = request.form['Rut_cliente']
-        fecha_actual = datetime.now()
-        Articulos = []
+            db.clientes.insert_one({"Nombre": NombreC,"rut":RutC, "Apellido": Apellido, "Teléfono": Teléfono, "Dirección": Dirección, "Email": Email})           
+        elif request.form.get('insertar_menu'):
+            # Acciones para actualizar menú
+            NombreM = request.form['nombre_menu']
+            DescripciónM = request.form['descripcion_menu']
+            Platos = []        
+            for i in range(3):
+            
+                NombreP = request.form[f'nombre_plato{i}']
+                DescripciónP = request.form[f'descripcion_plato{i}']
+                Preciop = request.form[f'precio_plato{i}']
+                Plato = {"Nombre": NombreP, "Descripción": DescripciónP , "Precio": Preciop}
+                Platos.append(Plato)
+            db.menu.insert_one({"Nombre": NombreM, "Descripción": DescripciónM,"Platos":Platos})   
+        elif request.form.get('insertar_pedidos'):
+            # Acciones para actualizar pedidos
+            RutC = request.form['Rut_cliente']
+            fecha_actual = datetime.now()
+            Articulos = []
         
-        for i in range(2):
-            NombreA = request.form[f'nombre_articulos{i}']
-            cantidad = request.form[f'cantidad_articulos{i}']
-            Precio = request.form[f'precio_articulos{i}']
-            Articulo = {"Nombre": NombreA, "Cantidad": cantidad, "PrecioUnitario": Precio}
-            Articulos.append(Articulo)
+            for i in range(2):
+                NombreA = request.form[f'nombre_articulos{i}']
+                cantidad = request.form[f'cantidad_articulos{i}']
+                Precio = request.form[f'precio_articulos{i}']
+                Articulo = {"Nombre": NombreA, "Cantidad": cantidad, "PrecioUnitario": Precio}
+                Articulos.append(Articulo)
+            db.pedidos.insert_one({"rut": RutC, "Fecha": fecha_actual , "Artículos": Articulos})   
+        else:
+            # Botón no reconocido
+            pass
 
-        
-        db.clientes.insert_one({"Nombre": NombreC,"rut":RutC, "Apellido": Apellido, "Teléfono": Teléfono, "Dirección": Dirección, "Email": Email}) 
-        db.menu.insert_one({"Nombre": NombreM, "Descripción": DescripciónM,"Platos":Platos})
-        db.pedidos.insert_one({"rut": RutC, "Fecha": fecha_actual , "Artículos": Articulos})
-        
-        return redirect('/')  
+        return redirect('/')
     else:
         return render_template('insert.html')
+   
+
 
 db = conexion()
 clientes = db.clientes.find()
 
+
+    
 @app.route('/Actualizar', methods=['GET', 'POST'])
+
 def actualizar():
     if request.method == 'POST':
         db = conexion()
-        db.clientes.find()  
-
-        #cliente#
-        NombreC = request.form['nombre_cliente']
-        RutC = request.form['Rut_cliente']
-        Apellido = request.form['apellido_cliente']
-        Teléfono = request.form['telefono_cliente']
-        Dirección = request.form['direccion_cliente']
-        Email = request.form['email_cliente']                
-        #menu#
-        NombreM = request.form['nombre_menu']
-        DescripciónM = request.form['descripcion_menu']
-        Platos = []        
-        for i in range(3):
+        db.clientes.find()
+          
+        if request.form.get('actualizar_clientes'):
+            # Acciones para actualizar clientes
+            #cliente#
+            NombreC = request.form['nombre_cliente']
+            RutC = request.form['Rut_cliente']
+            Apellido = request.form['apellido_cliente']
+            Teléfono = request.form['telefono_cliente']
+            Dirección = request.form['direccion_cliente']
+            Email = request.form['email_cliente'] 
             
-            NombreP = request.form[f'nombre_plato{i}']
-            DescripciónP = request.form[f'descripcion_plato{i}']
-            Preciop = request.form[f'precio_plato{i}']
-            Plato = {"Nombre": NombreP, "Descripción": DescripciónP , "Precio": Preciop}
-            Platos.append(Plato)
+            db.clientes.update_one({"rut":RutC}, {'$set': {"Nombre": NombreC, "Apellido": Apellido, "Teléfono": Teléfono, "Dirección": Dirección, "Email": Email}})          
+        elif request.form.get('actualizar_menu'):
+            # Acciones para actualizar menú
+            NombreM = request.form['nombre_menu']
+            DescripciónM = request.form['descripcion_menu']
+            Platos = []        
+            for i in range(3):
+            
+                NombreP = request.form[f'nombre_plato{i}']
+                DescripciónP = request.form[f'descripcion_plato{i}']
+                Preciop = request.form[f'precio_plato{i}']
+                Plato = {"Nombre": NombreP, "Descripción": DescripciónP , "Precio": Preciop}
+                Platos.append(Plato)
+            db.menu.update_one({"Nombre": NombreM}, {'$set': {"Descripción": DescripciónM, "Platos": Platos}})   
+        elif request.form.get('actualizar_pedidos'):
+            # Acciones para actualizar pedidos
+            RutC = request.form['Rut_cliente']
+            fecha_actual = datetime.now()
+            Articulos = []
         
-        #pedido#
+            for i in range(2):
+                NombreA = request.form[f'nombre_articulos{i}']
+                cantidad = request.form[f'cantidad_articulos{i}']
+                Precio = request.form[f'precio_articulos{i}']
+                Articulo = {"Nombre": NombreA, "Cantidad": cantidad, "PrecioUnitario": Precio}
+                Articulos.append(Articulo)
+            db.pedidos.update_one({"rut":RutC}, {'$set': { "Fecha": fecha_actual, "Artículos": Articulos}})   
+        else:
+            # Botón no reconocido
+            pass
 
-        RutC = request.form['Rut_cliente']
-        fecha_actual = datetime.now()
-        Articulos = []
-        
-        for i in range(2):
-            NombreA = request.form[f'nombre_articulos{i}']
-            cantidad = request.form[f'cantidad_articulos{i}']
-            Precio = request.form[f'precio_articulos{i}']
-            Articulo = {"Nombre": NombreA, "Cantidad": cantidad, "PrecioUnitario": Precio}
-            Articulos.append(Articulo)                  
-        # Actualizar cliente
-        db.clientes.update_one({"rut":RutC}, {'$set': {"Nombre": NombreC, "Apellido": Apellido, "Teléfono": Teléfono, "Dirección": Dirección, "Email": Email}})
-
-        # Actualizar menú 
-        db.menu.update_one({"Nombre": NombreM}, {'$set': {"Descripción": DescripciónM, "Platos": Platos}})
-
-        # Actualizar pedido
-        db.pedidos.update_one({"rut":RutC}, {'$set': { "Fecha": fecha_actual, "Artículos": Articulos}})
-        
         return redirect('/')
     else:
-        return render_template('actualizar.html', actualizar=True, clientes=clientes)  
+        return render_template('actualizar.html', actualizar=True, clientes=clientes)
    
 
 
